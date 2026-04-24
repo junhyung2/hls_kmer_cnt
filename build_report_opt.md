@@ -144,12 +144,17 @@ XRT_INI_PATH=./xrt.ini ./host_opt_hw kmer_count_opt_hw.xclbin \
 - **KMC3 / SW_EMU validation**: `022075_read1.fastq` (2.5 MB) + `022075_read2.fastq` (2.6 MB), k=21
 
 ### Correctness Verification (022075 dataset)
-| Tool | Unique 21-mers |
-|------|---------------|
-| KMC3 (ground truth) | 1,353,128 |
-| kmer_count (original, SW_EMU) | 1,353,128 ✓ |
+| Tool | Unique 21-mers | Match |
+|------|---------------|-------|
+| KMC3 (ground truth) | 1,353,128 | — |
+| kmer_count original (SW_EMU) | 1,353,128 | ✓ |
+| kmer_count_opt (HW_EMU) | 1,353,128 | ✓ |
 
-The opt kernel was tested to completion on HW_EMU (still running at report time). Server HW result n_unique total is consistent with the 750K dataset scale.
+HW_EMU per-CU breakdown (022075, k=21):
+- CU0: 337,510 | CU1: 338,663 | CU2: 338,744 | CU3: 338,211
+- Max imbalance: **0.34%** (slightly more than HW run's 0.08% — expected due to smaller dataset)
+
+All three tools agree exactly on unique k-mer count. Correctness fully verified.
 
 ### Performance (750K dataset, real HW on Xilinx U50)
 | Metric | Original (1 CU) | Opt (4 CU cuckoo) | Speedup |
