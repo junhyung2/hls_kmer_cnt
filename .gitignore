@@ -1,0 +1,19 @@
+# Build artifacts
+*.xo
+*.ltx
+*.link_summary
+*.compile_summary
+*.xclbin.info
+_x/
+.Xil/
+.run/
+*.log
+*.pb
+emconfig.json
+host_sw_emu
+host_hw_emu
+host_hw
+# Large xclbin kept for reference, others excluded by size
+kmer_count_sw_emu.xclbin
+kmer_count_hw_emu.xclbin
+kmer_count_opt_hw_emu.xclbin
