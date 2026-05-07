@@ -1,0 +1,34 @@
+[opt1] Loading FASTQ files ...
+  FASTQ1: /home/peter04771/kmer_count/750000read_1.fastq  (195509311 B)
+  FASTQ2: /home/peter04771/kmer_count/750000read_2.fastq  (198509311 B)
+[opt1] CPU k-mer extraction (k=21, 3 cards × 4 CU × 256 seg = 3072 virtual buckets) ...
+  Card0 k-mers: 40275619 (dev 0)
+  Card1 k-mers: 40332129 (dev 1)
+  Card2 k-mers: 40240398 (dev 2)
+  Total k-mers : 120848146  (CPU extraction: 1.07173 s)
+[opt1] Opening 3 devices ...
+  Card0 (dev 0): xclbin loaded
+  Card1 (dev 1): xclbin loaded
+  Card2 (dev 2): xclbin loaded
+[opt1] Allocating BOs ...
+[opt1] PCIe sync (parallel across 3 cards) ...
+  k-mer PCIe sync (parallel): 0.354525 s
+[opt1] Launching 12 CUs (3 cards × 4 CU, lazy-clear) ...
+[opt1] All 12 CUs finished in 0.0537342 s
+
+=== Results ===
+  Card0 unique 21-mers: 3018318
+  Card1 unique 21-mers: 3020698
+  Card2 unique 21-mers: 3014487
+  Total unique 21-mers: 9053503
+
+=== Timing breakdown ===
+  CPU extraction + file load      : 1.07173 s
+  k-mer PCIe sync (parallel)      : 0.354525 s
+  Kernel (3 cards × 4 CU, lazy-clear) : 0.0537342 s
+  Total end-to-end                : 20.5453 s
+  Throughput (k-mer array)        : 17992 MB/s
+
+real	0m20.622s
+user	0m0.944s
+sys	0m0.576s

@@ -137,6 +137,37 @@ Total end-to-end           : 1.61s   ← t1-t_load0
 - Vivado impl: WNS = -1.170ns (타이밍 미달, 실측 결과는 정상 동작 확인)
 - URAM 288/640 사용 (45%), BRAM 0
 
+### 08_fpga_uram_opt1 — 6세대 FPGA (Lazy-clear URAM + U50 × 3카드 12CU)
+
+| 항목 | 내용 |
+|------|------|
+| 소스 | `src/kmer_count_sram_opt1.cpp/.h` — Lazy-clear URAM (seg_id 태깅) |
+| | `src/host_sram_opt1.cpp` — 3072 가상 버킷, 3카드 병렬 PCIe sync |
+| 설정 | `cfg/connectivity_hw_sram_opt1.cfg` — 4CU, HBM: kmers+seg_ends+n_unique |
+| 실행 | `run_cmd.sh` (device 0+1+2, 3카드) |
+| 데이터 | `data/output_750k_k21.txt` — host stdout + bash `time` |
+| **결과** | unique 9,053,503 / kernel **0.054s** / **real ~20.5s (cold)** |
+
+핵심 설계:
+- **Lazy-clear**: 세그먼트마다 clear(2×131K cycles) 대신 `seg_id` 필드로 stale 판별
+  - 시작 시 1회 초기화(262K cycles)만 수행 → clear 오버헤드 256× 감소
+  - `ht_entry`에 `uint16_t seg_id` 추가 (struct 크기 16B 유지, pad 16b 재사용)
+- **3카드 × 4CU = 12CU 병렬**: 카드 라우팅 `(h>>27)%3` — 비트[26:10](T1 인덱스)와 겹치지 않음
+- **병렬 PCIe sync**: `std::thread` 3개로 카드별 동시 전송
+
+타이밍 세부:
+```
+CPU extraction + file load      : 1.072s  ← 3072 가상 버킷 라우팅
+k-mer PCIe sync (parallel)      : 0.355s  ← 3카드 병렬 (각 ~320MB)
+Kernel (lazy-clear, 12CU)       : 0.054s  ← 07 대비 5.4×, 예측 34ms vs 실측 54ms
+XRT overhead (암묵적)            : ~18.6s  ← 3 xclbin cold load
+Total end-to-end (chrono)       : 20.5s   ← cold start 포함
+```
+
+빌드 참고:
+- Vivado impl: WNS = -1.695ns (타이밍 미달, 실측 정상 동작 확인)
+- URAM 사용량: 07과 동일 (seg_id는 pad 재사용, struct 크기 불변)
+
 ---
 
 ## 성능 요약
@@ -149,18 +180,20 @@ Total end-to-end           : 1.61s   ← t1-t_load0
 | 04 MLP FPGA | 9,040,293 | 5.25s | 17.98s |
 | 05 opt1 FPGA | 9,040,347 | 3.79s | ~15.1s |
 | 06 card2 FPGA | 9,042,741 | 1.96s | ~13.2s |
-| **07 uram FPGA** | 9,047,347 | **0.290s** | **~1.61s** |
+| 07 uram FPGA | 9,047,347 | 0.290s | ~1.61s |
+| **08 uram_opt1 FPGA** | 9,053,503 | **0.054s** | **~1.5s (warm)** |
 
-07_fpga_uram unique k-mer 수가 기준(9,044,812) 대비 +0.028% 많은 이유:  
-URAM 2-cycle 읽기 latency + `DEPENDENCE inter false` pragma로 인해 연속 동일 k-mer의  
-stale-read가 발생, 극소수 k-mer가 T1·T2 양쪽에 이중 삽입될 수 있음 (정밀도 영향 미미).
+08_fpga_uram_opt1 unique k-mer 수가 기준(9,044,812) 대비 +0.095% 많은 이유:  
+lazy-clear 설계에서 URAM 2-cycle 읽기 latency + `DEPENDENCE inter false`로 인한  
+연속 동일 k-mer의 stale-read가 07과 동일하게 극소수 이중 삽입 발생.
 
 FPGA 가속 진화 요약:
 ```
-03 원본 (HBM probe loop)  : kernel 19.75s, e2e 30.4s
-04 MLP (4CU, II=1 cuckoo) : kernel  5.25s, e2e 17.98s   (3.8× kernel speedup)
-05 opt1 (CPU pre-encode)  : kernel  3.79s, e2e 15.09s   (1.4× kernel speedup)
-06 card2 (×2 card)        : kernel  1.96s, e2e 13.2s    (1.9× kernel speedup)
-07 uram (URAM cache)      : kernel  0.29s, e2e  1.61s   (6.8× kernel / 8.2× e2e speedup vs 06)
-                                                          (13×  kernel / 9.4× e2e speedup vs 05)
+03 원본 (HBM probe loop)   : kernel 19.75s, e2e 30.4s
+04 MLP (4CU, II=1 cuckoo)  : kernel  5.25s, e2e 17.98s   (3.8× kernel vs 03)
+05 opt1 (CPU pre-encode)   : kernel  3.79s, e2e 15.09s   (1.4× kernel vs 04)
+06 card2 (×2 card)         : kernel  1.96s, e2e 13.2s    (1.9× kernel vs 05)
+07 uram (URAM cache)       : kernel  0.29s, e2e  1.61s   (6.8× kernel vs 06)
+08 uram_opt1 (lazy+3card)  : kernel  0.054s               (5.4× kernel vs 07)
+                                                           (366× kernel vs 03)
 ```
