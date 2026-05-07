@@ -1,0 +1,29 @@
+# Dataset 정보
+
+[파일]
+750000read_1.fastq  — paired-end read 1
+750000read_2.fastq  — paired-end read 2
+
+[서버 경로]
+/home/peter04771/kmer_count/750000read_1.fastq
+/home/peter04771/kmer_count/750000read_2.fastq
+
+[크기]
+750000read_1.fastq : 195,509,311 bytes (186 MB)
+750000read_2.fastq : 198,509,311 bytes (189 MB)
+
+[MD5 체크섬]
+dc419fd9dc2c79df0bc432b3394c7495  750000read_1.fastq
+f061015fc58081306f906f900b6226a9  750000read_2.fastq
+
+[레코드 수]
+750000read_1.fastq : 3,000,000 lines → 750,000 reads (FASTQ 4줄/read)
+750000read_2.fastq : 3,000,000 lines → 750,000 reads
+합계               : 1,500,000 reads
+
+[k-mer 통계 (k=21)]
+Total k-mers extracted : 120,848,146  (CPU pre-encoding 기준)
+True unique 21-mers    : 9,044,812    (kc-c4, KMC 3.2.4 일치)
+
+[검증 명령]
+md5sum 750000read_1.fastq 750000read_2.fastq

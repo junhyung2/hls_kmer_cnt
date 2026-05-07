@@ -1,0 +1,38 @@
+Autocomplete enabled for the xbutil command
+Autocomplete enabled for the xbmgmt command
+XILINX_XRT        : /opt/xilinx/xrt
+PATH              : /opt/xilinx/xrt/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
+LD_LIBRARY_PATH   : /opt/xilinx/xrt/lib
+PYTHONPATH        : /opt/xilinx/xrt/python
+[sram] Loading FASTQ files ...
+  FASTQ1: /home/peter04771/kmer_count/750000read_1.fastq  (195509311 B)
+  FASTQ2: /home/peter04771/kmer_count/750000read_2.fastq  (198509311 B)
+[sram] CPU k-mer extraction (k=21, 1024 virtual buckets) ...
+  CU0 k-mers: 30223739 (256 segments)
+  CU1 k-mers: 30214787 (256 segments)
+  CU2 k-mers: 30210826 (256 segments)
+  CU3 k-mers: 30198794 (256 segments)
+  Total k-mers : 120848146  (CPU extraction: 0.886555 s)
+[sram] Opening device 0 ...
+[sram] Allocating BOs and syncing k-mers ...
+  k-mer PCIe sync: 0.239894 s
+[sram] Launching 4 CUs (URAM multi-segment) ...
+[sram] All 4 CUs finished in 0.290097 s
+
+=== Results ===
+  CU0 unique 21-mers: 2262537
+  CU1 unique 21-mers: 2262006
+  CU2 unique 21-mers: 2260225
+  CU3 unique 21-mers: 2262579
+  Total unique 21-mers: 9047347
+
+=== Timing breakdown ===
+  CPU extraction + file load : 0.886555 s
+  k-mer PCIe sync            : 0.239894 s
+  Kernel (URAM multi-seg)    : 0.290097 s
+  Total end-to-end           : 1.61999 s
+  Throughput (k-mer array)   : 3332.63 MB/s
+
+real	0m1.717s
+user	0m0.663s
+sys	0m0.474s

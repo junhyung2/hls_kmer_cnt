@@ -1,0 +1,46 @@
+Autocomplete enabled for the xbutil command
+Autocomplete enabled for the xbmgmt command
+XILINX_XRT        : /opt/xilinx/xrt
+PATH              : /opt/xilinx/xrt/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
+LD_LIBRARY_PATH   : /opt/xilinx/xrt/lib
+PYTHONPATH        : /opt/xilinx/xrt/python
+[card2] Loading FASTQ files ...
+  FASTQ1: /home/peter04771/kmer_count/750000read_1.fastq  (195509311 B)
+  FASTQ2: /home/peter04771/kmer_count/750000read_2.fastq  (198509311 B)
+[card2] CPU k-mer extraction (k=21, 8 buckets) ...
+  CU0 (card0) k-mers: 15117234
+  CU1 (card0) k-mers: 15055082
+  CU2 (card0) k-mers: 15083347
+  CU3 (card0) k-mers: 15101377
+  CU4 (card1) k-mers: 15106505
+  CU5 (card1) k-mers: 15159705
+  CU6 (card1) k-mers: 15127479
+  CU7 (card1) k-mers: 15097417
+  Total k-mers: 120848146  (CPU extraction: 0.837402 s)
+[card2] Opening device 0 (card0) and 1 (card1) ...
+[card2] Allocating k-mer buffers and syncing ...
+  k-mer sync (both cards): 1.19566 s
+[card2] Launching 8 CUs (4 per card, both cards in parallel) ...
+[card2] All kernels finished in 1.96094 s
+
+=== Results ===
+  CU0 (card0) unique 21-mers : 1130111
+  CU1 (card0) unique 21-mers : 1130103
+  CU2 (card0) unique 21-mers : 1128057
+  CU3 (card0) unique 21-mers : 1130795
+  CU4 (card1) unique 21-mers : 1131322
+  CU5 (card1) unique 21-mers : 1130720
+  CU6 (card1) unique 21-mers : 1131041
+  CU7 (card1) unique 21-mers : 1130592
+  Total unique 21-mers : 9042741
+
+=== Timing breakdown ===
+  CPU extraction + file load : 0.837402 s
+  k-mer PCIe sync (2 cards)  : 1.19566 s
+  Kernel (both cards)        : 1.96094 s
+  Total end-to-end           : 13.1728 s
+  Throughput (k-mer array)   : 493.021 MB/s
+
+real	0m13.410s
+user	0m0.522s
+sys	0m1.375s

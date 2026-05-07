@@ -1,0 +1,30 @@
+Autocomplete enabled for the xbutil command
+Autocomplete enabled for the xbmgmt command
+XILINX_XRT        : /opt/xilinx/xrt
+PATH              : /opt/xilinx/xrt/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
+LD_LIBRARY_PATH   : /opt/xilinx/xrt/lib
+PYTHONPATH        : /opt/xilinx/xrt/python
+[kmer_count_mlp] Loading FASTQ files ...
+  FASTQ1 : /home/peter04771/kmer_count/750000read_1.fastq  (195509311 B)
+  FASTQ2 : /home/peter04771/kmer_count/750000read_2.fastq  (198509311 B)
+  k      : 21
+  N_CU   : 4
+  HT_BITS: 26  (T_SIZE=33554432 entries = 512 MB per T per CU)
+  Total HT: 4096 MB
+[kmer_count_mlp] Opening device 0 ...
+[kmer_count_mlp] Initializing hash tables (4096 MB total) ...
+[kmer_count_mlp] Syncing buffers to device ...
+[kmer_count_mlp] Launching 4 CUs ...
+[kmer_count_mlp] All CUs finished in 5.25093 s
+
+=== Results ===
+  CU0 unique 21-mers : 2260827
+  CU1 unique 21-mers : 2260194
+  CU2 unique 21-mers : 2258529
+  CU3 unique 21-mers : 2260743
+  Total unique 21-mers : 9040293
+  Throughput : 75.0378 MB/s
+
+real	0m17.981s
+user	0m0.202s
+sys	0m0.703s

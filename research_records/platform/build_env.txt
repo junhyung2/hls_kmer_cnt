@@ -1,0 +1,60 @@
+# Build Environment (FPGA xclbin 컴파일 머신)
+# kmer_count_opt1_hw.xclbin, kmer_mlp.xclbin 등 xclbin 파일 생성에 사용
+
+[OS]
+Distribution : Ubuntu 20.04.6 LTS (Focal)
+Kernel       : Linux 5.15.0-139-generic
+
+[CPU]
+Model        : AMD Ryzen 7 7700X 8-Core Processor
+Sockets      : 1
+Cores/Socket : 8
+Threads/Core : 2  (16 logical cores total)
+Max Freq     : 5572 MHz
+
+[RAM]
+Total        : 61 GB
+
+[Compiler]
+g++          : Ubuntu 9.4.0-1ubuntu1~20.04.2 (g++ 9.4.0)
+std          : -std=c++17 -O2
+
+[Vitis / HLS]
+Tool         : Xilinx Vitis 2022.1
+Version      : v2022.1 (64-bit)
+Build        : SW Build 3524075, 2022-04-13-17:42:45
+Path         : /tools/Xilinx/Vitis/2022.1/bin/v++
+
+[XRT (로컬, 호스트 바이너리 컴파일용)]
+Version      : 2.13.466
+Branch       : 2022.1
+Hash         : f5505e402c2ca1ffe45eb6d3a9399b23a0dc8776
+Hash Date    : 2022-04-15
+Include path : /opt/xilinx/xrt/include
+Lib path     : /opt/xilinx/xrt/lib
+
+[Platform File]
+Name         : xilinx_u50_gen3x16_xdma_5_202210_1
+Path         : /opt/xilinx/platforms/xilinx_u50_gen3x16_xdma_5_202210_1/
+              (Vitis 2022.1용 공식 플랫폼 파일)
+Download     : https://www.xilinx.com/support/download/index.html/content/xilinx/en/downloadNav/alveo/u50.html
+              → "Alveo U50 Deployment Platform" → xilinx_u50_gen3x16_xdma_5_202210_1
+
+[Host 바이너리 링크 플래그]
+LDFLAGS      : -L/opt/xilinx/xrt/lib -lxrt_coreutil -lpthread -luuid
+
+[xclbin 빌드 명령 예시]
+  # compile
+  v++ -c --platform xilinx_u50_gen3x16_xdma_5_202210_1 --target hw \
+      -I src -k kmer_count_opt1 -o kmer_count_opt1_hw.xo src/kmer_count_opt1.cpp
+
+  # link
+  v++ -l --platform xilinx_u50_gen3x16_xdma_5_202210_1 --target hw \
+      --config connectivity_hw_opt1.cfg \
+      -o kmer_count_opt1_hw.xclbin kmer_count_opt1_hw.xo
+
+  # host
+  g++ -std=c++17 -O2 -DHT_BITS_HOST_OPT1=26 \
+      -I/opt/xilinx/xrt/include -I src \
+      -o host_opt1_hw src/host_opt1.cpp \
+      -L/opt/xilinx/xrt/lib -lxrt_coreutil -lpthread -luuid

@@ -130,6 +130,58 @@ HT_BITS for HW_EMU reduced from 24 (256 MB) to 22 (64 MB) to limit xsim memory i
 
 ---
 
+---
+
+## Optimized Designs (src_kmer_opt1, src_kmer_opt_card2)
+
+### opt1 — HT on-device init + CPU pre-encoding (4 CU, 1× U50)
+
+**Build:** `src_kmer_opt1/kmer_count_opt1_hw.xclbin` — completed 2026-04-29 17:53 (1h 8m)
+
+Key changes vs MLP:
+- CPU pre-encodes FASTQ → canonical k-mer hashes → 4 per-CU buckets (removes FPGA parse stage)
+- On-device HT init: kernel writes EMPTY to T1+T2 via DATAFLOW at II=1 (removes ~12s PCIe HT DMA)
+- HMSS connections: 16 (vs 20 for MLP)
+
+**Server test results (750K paired reads, k=21, U50 device 0):**
+
+| Metric | Value |
+|--------|-------|
+| Total k-mers | 120,848,146 |
+| Total unique 21-mers | 9,040,333 |
+| CPU extraction + file load | 0.83 s |
+| k-mer PCIe sync | 0.59 s |
+| Kernel (HT init + insert) | **3.79 s** |
+| **Total end-to-end** | **14.96 s** |
+| Throughput | 254.8 MB/s (k-mer array) |
+
+Note: ~9.75 s fixed overhead from XRT xclbin load + HBM BO allocation (4 GB HT across 4 CUs).
+
+---
+
+### card2 — Dual U50, 8 CU total (src_kmer_opt_card2)
+
+**Kernel:** Same `kmer_count_opt1_hw.xclbin` loaded on both cards independently.
+**Host:** `host_card2_hw` — routes k-mers to 8 buckets (h & 7), launches 4 CUs per card simultaneously.
+
+**Server test results (750K paired reads, k=21, U50 device 0 + device 1):**
+
+| Metric | opt1 (4 CU) | card2 (8 CU) | Speedup |
+|--------|-------------|--------------|---------|
+| CPU extraction | 0.83 s | 0.80 s | ~1× |
+| PCIe sync | 0.59 s | 1.15 s | 0.5× (sequential, 8 syncs) |
+| **Kernel** | **3.79 s** | **1.96 s** | **1.93×** |
+| **End-to-end** | **14.96 s** | **12.79 s** | **1.17×** |
+| Total unique | 9,040,333 | 9,042,740 | ✓ |
+| Throughput | 254.8 MB/s | 493.1 MB/s | 1.94× |
+
+Notes:
+- Kernel speedup 1.93× ≈ theoretical 2× maximum (insert time halved, fixed HT init unchanged)
+- PCIe sync is sequential across 8 BOs; parallelizing with std::thread would restore ~0.6 s
+- End-to-end limited by fixed XRT BO allocation overhead (~9 s per card × sequential)
+
+---
+
 ## Deployment
 
 To run on a real Alveo U50:

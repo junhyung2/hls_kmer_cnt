@@ -1,0 +1,64 @@
+# Run Environment (실행 서버 — u50-server)
+# 모든 벤치마크 실행에 사용된 머신
+
+[OS]
+Distribution : Ubuntu 20.04.6 LTS (Focal)
+Kernel       : Linux (Ubuntu 20.04 계열)
+
+[CPU]
+Model        : AMD Ryzen 7 9800X3D 8-Core Processor
+Sockets      : 1
+Cores/Socket : 8
+Threads/Core : 2  (16 logical cores total)
+Max Freq     : 8096 MHz (3D V-Cache 탑재)
+
+[RAM]
+Total        : 186 GB
+
+[XRT]
+Version      : 2.15.225
+Branch       : 2023.1
+Hash         : adf27adb3cfadc6e4c41d6db814159f1329b24f3
+Hash Date    : 2023-05-03
+XOCL Driver  : 2.15.225
+XCLMGMT      : 2.15.225
+Setup script : source /opt/xilinx/xrt/setup.sh
+
+[FPGA Card 0]
+BDF          : 0000:12:00.1
+Shell        : xilinx_u50_gen3x16_xdma_base_5
+Platform UUID: 44654095-25B4-C06A-EC6D-0B479D3FEBE8
+Device ID    : user(inst=128)
+JTAG ID      : 0x14b77093
+DDR          : 0 (HBM only)
+HBM          : 8 GB (32 pseudo-channels × 256 MB)
+DATA_CLK     : 300 MHz
+KERNEL_CLK   : 500 MHz
+hbm_aclk     : 450 MHz
+
+[FPGA Card 1]
+BDF          : 0000:17:00.1
+Shell        : xilinx_u50_gen3x16_xdma_base_5
+Platform UUID: 44654095-25B4-C06A-EC6D-0B479D3FEBE8
+Device ID    : user(inst=129)
+JTAG ID      : 0x14b77093
+DDR          : 0 (HBM only)
+HBM          : 8 GB (32 pseudo-channels × 256 MB)
+DATA_CLK     : 300 MHz
+KERNEL_CLK   : 500 MHz
+hbm_aclk     : 415 MHz   ← Card 0(450MHz)과 차이 있음
+
+[PCIe]
+Interface    : Gen3 x16
+
+[Shell 설치]
+xclbin과 shell UUID가 일치해야 실행 가능.
+Shell 파일: xilinx_u50_gen3x16_xdma_base_5
+Install:    https://www.xilinx.com/support/download/index.html/content/xilinx/en/downloadNav/alveo/u50.html
+            → "Alveo U50 Deployment Platform" (XRT 2023.1 호환 버전)
+
+[재현 시 주의사항]
+- xbutil examine 으로 UUID(44654095-...) 일치 확인 필수
+- hbm_aclk 차이(450 vs 415 MHz)로 카드 간 HBM 대역폭 소폭 차이 있을 수 있음
+- XRT 버전 불일치 시 xclbin 로드 실패 가능 → 빌드 XRT(2.13)와 실행 XRT(2.15) 차이는
+  xclbin forward-compatibility로 동작 확인됨

@@ -1,0 +1,19 @@
+[kmer_count_opt] Loading FASTQ files ...
+  FASTQ1 : 750000read_1.fastq  (195509311 B)
+  FASTQ2 : 750000read_2.fastq  (198509311 B)
+  k      : 21
+  N_CU   : 4
+  HT/CU  : 2^26 entries = 1024 MB
+[kmer_count_opt] Opening device 1 ...
+[kmer_count_opt] Initializing 4x hash tables (4096 MB total) ...
+[kmer_count_opt] Syncing buffers to device ...
+[kmer_count_opt] Launching 4 CUs ...
+[kmer_count_opt] All CUs finished in 19.7492 s
+
+=== Results ===
+  CU0 unique 21-mers : 2261870
+  CU1 unique 21-mers : 2261374
+  CU2 unique 21-mers : 2259626
+  CU3 unique 21-mers : 2261942
+  Total unique 21-mers : 9044812
+  Throughput : 19.9512 MB/s

@@ -1,0 +1,40 @@
+Autocomplete enabled for the xbutil command
+Autocomplete enabled for the xbmgmt command
+XILINX_XRT        : /opt/xilinx/xrt
+PATH              : /opt/xilinx/xrt/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
+LD_LIBRARY_PATH   : /opt/xilinx/xrt/lib
+PYTHONPATH        : /opt/xilinx/xrt/python
+[opt1] Loading FASTQ files ...
+  FASTQ1: /home/peter04771/kmer_count/750000read_1.fastq  (195509311 B)
+  FASTQ2: /home/peter04771/kmer_count/750000read_2.fastq  (198509311 B)
+[opt1] CPU k-mer extraction (k=21) ...
+  CU0 k-mers: 30223739
+  CU1 k-mers: 30214787
+  CU2 k-mers: 30210826
+  CU3 k-mers: 30198794
+  Total k-mers: 120848146  (CPU extraction: 0.878059 s)
+[opt1] Opening device 0 ...
+[opt1] Allocating and syncing k-mer buffers ...
+[opt1] Allocating HT buffers (4096 MB, on-device init) ...
+[opt1] Syncing k-mer buffers to device ...
+  k-mer sync: 0.597948 s
+[opt1] Launching 4 CUs (on-device HT init + insert) ...
+[opt1] Kernel finished in 3.79439 s
+
+=== Results ===
+  CU0 unique 21-mers : 2260851
+  CU1 unique 21-mers : 2260209
+  CU2 unique 21-mers : 2258538
+  CU3 unique 21-mers : 2260749
+  Total unique 21-mers : 9040347
+
+=== Timing breakdown ===
+  CPU extraction + file load : 0.878059 s
+  k-mer PCIe sync            : 0.597948 s
+  Kernel (HT init + insert)  : 3.79439 s
+  Total end-to-end           : 15.0911 s
+  Throughput (vs raw input)  : 254.793 MB/s (k-mer array)
+
+real	0m15.277s
+user	0m0.624s
+sys	0m0.950s

@@ -6,14 +6,19 @@
 *.xclbin.info
 _x/
 .Xil/
+.ipcache/
 .run/
 *.log
 *.pb
 emconfig.json
+# Host binaries
 host_sw_emu
 host_hw_emu
 host_hw
-# Large xclbin kept for reference, others excluded by size
-kmer_count_sw_emu.xclbin
-kmer_count_hw_emu.xclbin
-kmer_count_opt_hw_emu.xclbin
+host_opt_hw_emu
+host_sram_hw
+# Large binary outputs
+*.xclbin
+*.run_summary
+native_trace.csv
+summary.csv
