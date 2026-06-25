@@ -1,0 +1,48 @@
+# exp58 50G Results (ERR3239334_50G_1/2.fastq, -b 64)
+# Date: 2026-06-25
+
+[sort58] Total FASTQ: 45850.9 MB
+  batch_bytes/inst: 64 MB  estimated batches: 80
+  Pool reserved: ~3125078956 slots/CU (25.0006 GB/CU), 48829358 slots/sub-bin
+
+  Total k-mers in pool: 18040771848 (144.326 GB)
+  Max sub-bin size: 59738698 (477.91 MB)
+  Sort mode: parallel (8 CU × 64 sub-bins)
+
+  [CU 0] recs=2402330368  sort=50.6113s  count=3.01062s  unique=364421725
+  [CU 1] recs=2253531188  sort=50.2943s  count=3.1021s   unique=350341220
+  [CU 2] recs=2215762575  sort=47.9048s  count=2.84756s  unique=352515122
+  [CU 3] recs=2177366145  sort=49.5666s  count=3.09514s  unique=347478656
+  [CU 4] recs=2252624843  sort=49.3132s  count=2.84557s  unique=351812305
+  [CU 5] recs=2196091790  sort=48.7147s  count=3.01219s  unique=348909570
+  [CU 6] recs=2233994620  sort=49.2984s  count=2.91355s  unique=348331000
+  [CU 7] recs=2309070319  sort=48.8067s  count=2.92999s  unique=358295448
+
+  Batches        : 80
+  FASTQ total    : 45850.9 MB
+  Unique k-mers  : 2822105046
+  Throughput     : 348.142 MB/s
+  KA+DMA total   : 57.439 s
+  append total   : 19.8477 s
+  sort(CU sum)   : 394.51 s
+  count(CU sum)  : 23.7567 s
+  sort+count wall: 54.0355 s
+  extraction e2e : 77.666 s
+  e2e (all)      : 131.702 s
+
+# 21G Results (ERR3239334_21G, -b 64)
+  e2e: 59.904s
+  sort+count wall: 24.6s
+  KA+DMA: 25.9s
+  Unique: 2,349,778,827 (matches KMC exactly)
+  Max sub-bin: 26.9M (215MB)
+
+# Comparison (50G ERR3239334)
+| Tool           | e2e    | unique k-mers   |
+|----------------|--------|-----------------|
+| FPGA exp58     | 131.7s | 2,822,105,046 ✓ |
+| KMC            | 152s   | 2,822,105,046   |
+| FPGA exp57     | 187.7s | 2,822,105,046 ✓ |
+| FPGA exp55     | 270.5s | 2,822,105,046 ✓ |
+| JF             | 764s   | —               |
+| FPGA exp50     | 1694s  | 2,676,351,925   |
