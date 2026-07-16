@@ -1,0 +1,69 @@
+exp73 주석 교정 (2026-07-14) — 동작 코드 무변경, 결과 동일 확인
+
+== 배경 ==
+논문 작성을 위해 exp73_slim.cpp를 정독하는 과정에서, 주석층이 exp49→50→65→68→69
+→71→73을 거치며 갱신 없이 누적돼 여러 세대의 설계가 한 파일에 겹쳐 적혀 있음을 발견.
+일부는 단순 낡음이 아니라 **논문에 그대로 옮기면 틀린 수치를 쓰게 되는 오류**였음.
+
+== 발견된 불일치 ==
+[치명적 — 숫자/설계가 실제와 다름]
+ 1. 해시테이블 크기 4배 오류 (두 곳 중복: HT 주석 블록, pers_flat 주석)
+      주석: 1024 bins / 32 MB per CU / 총 256 MB
+      실제: NBINS_BITS=12 → 4096 bins / 128 MB per CU / 총 1 GB
+            (4096 x 4096 = 16,777,216 슬롯 x 8B, x8 CU = 134,217,728 슬롯 = 1GB)
+      → NBINS_BITS를 10→12로 올릴 때 주석을 안 고친 흔적.
+ 2. bin/slot 유도 주석이 "꺼져 있는 경로"를 설명
+      주석: Bin = (kmer >> FE_N_CU_BITS) & (NBINS-1)   ← 이건 #else(USE_REHASH=0)
+      실제: 기본 빌드는 USE_REHASH=1 → fe_mix64(splitmix64) 경유
+      → 바로 아래 exp71 주석과 정면 모순. 논문의 핵심 기여(정확도 복구)를
+        틀리게 기술하게 만드는 주석이었음.
+ 3. "insert가 DOMINANT phase"라는 주장 (2곳: acc 주석, spawn_acc 주석)
+      exp75 실측으로 반증됨: scatter 45.5 core-s vs insert 19.0 core-s (scatter가 2.4배)
+
+[낡음 — 오해 소지]
+ 4. 파일 헤더가 "exp68 (H1)" 라벨 (이 파일은 exp73). exp65/50/49 변경이력이 뒤섞여 누적.
+ 5. Usage: 바이너리명이 host_3card_stream(실제 h73_slim), -as 플래그 누락
+    (챔피언 구성이 -as 4인데 문서화 안 됨). in-code usage 문자열도 동일 누락.
+ 6. "unique count must equal exp49 result" — exp49 값은 rehash 이전의 깨진 숫자.
+    현재 정답 기준은 KMC와 일치하는 109,533,748.
+ 7. "At 9M unique (750K reads) → 26.8% load → fast ✓" — 실제 22.72M pairs /
+    109.5M unique. 그리고 이 "load 낮으니 안전" 가정이 바로 exp71이 깨뜨린 것.
+ 8. teardown "free ~21GB host bufs" — exp73이 19.3GB→~6GB로 줄인 뒤의 잔여 문구.
+ 9. pers_bins[b] — 존재하지 않는 식별자 (실제 pers_flat).
+
+[코드 잔해]
+10. acc_insert_batch() (44줄) = 완전한 dead code. exp69에서 2-phase로 분리한 뒤
+    원본을 안 지움. 호출처 0곳 (실제로는 acc_scatter_phase + acc_insert_bins만 사용).
+11. #include <mutex>, <condition_variable> 미사용 (코드 주석 스스로 "no longer
+    needed"라 적어놓고 include만 남김). 반대로 printf/fprintf를 쓰면서 <cstdio>가
+    없어 transitive include에 의존 중 → 명시적으로 추가.
+
+== 교정 내용 ==
+헤더 전면 재작성(exp73 기준, 계보/병목/champion config/정답 기준 명시), HT 상수 주석
+정정, acc 주석을 실측값 기준으로 재작성, dead code 제거, include 정리.
+
+== 검증: 동작 코드 무변경 ==
+gcc -fpreprocessed -dD -E -P 로 주석/공백 제거 후 diff → 차이는 정확히 4가지:
+  (1) include 교체  (2) dead code 제거  (3) usage 문자열 리터럴  (4) teardown 안내 문구
+계산 로직은 한 줄도 안 바뀜.
+
+== 검증: 실행 결과 동일 (같은 세션 back-to-back, -b 40 -n 3 -as 4) ==
+| | h73_slim (원본) | h73_doc (교정본) |
+|---|---|---|
+| unique (3런 전부) | 109,533,748 | 109,533,748 |
+| dropped inserts | 0 | 0 |
+| full bins | 0 / 32768 | 0 / 32768 |
+| load | 81.609% | 81.609% |
+| median e2e | 10.2214 s | 10.2401 s |
+| WALL (-n 3) | 34.23 s | 34.25 s |
+e2e 차이 0.019s = 런간 노이즈 수준. → 교정본을 정본으로 승격, h73_slim 재빌드.
+
+== 부수 산출: 빌드 스크립트 ==
+exp73의 빌드 명령이 어디에도 기록돼 있지 않았음(-luuid 필요, XRT setup.sh source
+필요 — 둘 다 처음엔 실패). build_and_run.sh 로 기록.
+
+== 산출물 ==
+로컬: research_records/73_setup_slim/{src/exp73_slim.cpp(교정), build_and_run.sh,
+      data/analysis.txt}
+서버: ~/kmer_exp69_h1h2/src/{exp73_slim.cpp(교정), h73_slim(재빌드),
+      exp73_slim.cpp.pre_doccorrection.bak(원본 백업)}
